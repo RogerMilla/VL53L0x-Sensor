@@ -1,0 +1,21 @@
+#include "mbed.h"
+I2C rangefinder(PB_11, PB_10); //sda, sc1
+Serial pc(USBTX, USBRX); //tx, rx
+const int addr = 0x52;
+char config_r[2];
+char range_read[2];
+float range;
+int main() {
+ while (1) {
+ config_r[0] = 0x00; //set pointer reg to ‘cmd register'
+ config_r[1] = 0x51; // config data byte1
+ rangefinder.write(addr, config_r, 2);
+ wait(0.07);
+ config_r[0] = 0x02; //set pointer reg to 'data register'
+ rangefinder.write(addr, config_r, 1); //send to pointer 'read range'
+ rangefinder.read(addr, range_read, 2); //read the two-byte range data
+ range = ((range_read[0] << 4) + range_read[1]);
+ pc.printf("Range = %.2f cm\n\r", range); //print range on screen
+ wait(0.05);
+ }
+}
